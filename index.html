@@ -7,8 +7,8 @@
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <title>Densidade no copo | US Vale Verde | OpenBlast</title>
-    <link rel="stylesheet" href="styles.css?v=20261126-layout-1" />
-    <script type="module" src="js/app.js?v=20261126-layout-1"></script>
+    <link rel="stylesheet" href="styles.css?v=20261126-eixos-1" />
+    <script type="module" src="js/app.js?v=20261126-eixos-1"></script>
   </head>
   <body>
     <div class="screen">
@@ -28,17 +28,22 @@
           <div class="layout">
             <section class="card card--table" aria-labelledby="tabela-titulo">
               <div class="card__head">
-                <h2 id="tabela-titulo">Tabela</h2>
-                <p class="card__hint">Linhas: coluna manométrica (m) · Colunas: densidade no fundo do furo (g/cm³) · Valores: densidade no copo (g/cm³)</p>
+                <h2 id="tabela-titulo">Densidade no copo (g/cm³)</h2>
               </div>
-              <div class="table-wrap" tabindex="0" aria-label="Tabela de densidade no copo, role para os lados">
-                <table class="dtable" id="dtable">
-                  <caption class="sr-only">Densidade no copo por coluna e densidade no fundo do furo</caption>
-                  <thead>
-                    <tr id="thead-row"></tr>
-                  </thead>
-                  <tbody id="tbody"></tbody>
-                </table>
+              <div class="chart">
+                <p class="axis-x">Densidade no fundo do furo (g/cm³)</p>
+                <div class="chart__body">
+                  <p class="axis-y"><span>Coluna manométrica (m)</span></p>
+                  <div class="table-wrap" tabindex="0" aria-label="Tabela de densidade no copo, role para os lados">
+                    <table class="dtable" id="dtable">
+                      <caption class="sr-only">Densidade no copo por coluna manométrica e densidade no fundo do furo</caption>
+                      <thead>
+                        <tr id="thead-row"></tr>
+                      </thead>
+                      <tbody id="tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
               <ul class="legend" aria-label="Legenda">
                 <li><span class="sw sw--critico"></span> Condição crítica (não recomendado)</li>

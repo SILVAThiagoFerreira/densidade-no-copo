@@ -89,6 +89,18 @@ a { color: inherit; }
 .card__hint { margin: 6px 0 0; color: var(--gray-mid); font-size: 12.5px; line-height: 1.4; }
 
 /* Tabela */
+/* Eixos do gráfico: X embaixo da tabela, Y ao lado esquerdo */
+.chart__body { display: flex; align-items: stretch; gap: 8px; }
+.chart .table-wrap { flex: 1 1 auto; min-width: 0; }
+.axis-x {
+  margin: 0 0 8px 34px; color: var(--gray-text); font-size: 12px; text-align: center;
+}
+.axis-y {
+  margin: 0; color: var(--gray-text); font-size: 12px; white-space: nowrap;
+}
+.axis-y span {
+  display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg);
+}
 /* Sem barra de rolagem visível; no celular a tabela ainda rola com o dedo */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .table-wrap::-webkit-scrollbar { display: none; }
