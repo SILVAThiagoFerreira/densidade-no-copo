@@ -1,7 +1,7 @@
 # Densidade no copo
 
 Ferramenta do hub OpenBlast (US Vale Verde) para consultar a densidade no copo da emulsão explosiva.
-Informe o diâmetro do furo, a altura do tampão, a altura da coluna de carga e a densidade no fundo do furo.
+Informe o diâmetro do furo, a altura do tampão, a profundidade do furo e a densidade no fundo do furo. A altura da coluna de carga é calculada automaticamente (profundidade − tampão).
 A célula correspondente da tabela é marcada automaticamente, e a lâmina pode ser exportada em PDF.
 
 ## Estrutura
@@ -24,8 +24,6 @@ A célula correspondente da tabela é marcada automaticamente, e a lâmina pode 
 5. **Resultado.** A densidade no copo da célula marcada. Se a célula estiver vazia, a página informa "não tabelada" e não inventa valor. Valores iguais ou acima de `limiar_critico_g_cm3` são marcados como crítico.
 
 Os parâmetros (gravidade, densidade do tampão, coeficiente de atrito, coeficiente de empuxo lateral K, limiar crítico) ficam em `config.json`.
-
-> **Status:** modelo provisório (versão 0.1.0). Valide com o P&D antes de uso operacional.
 
 ## Lâmina em PDF
 

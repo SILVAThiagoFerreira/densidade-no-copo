@@ -1,6 +1,6 @@
-import { consultar } from './calc.js';
+import { consultar, colunaDeCargaBruta } from './calc.js';
 
-const CAMPOS = ['diametro_mm', 'tampao_m', 'coluna_m', 'densidade_fundo', 'inclinacao_graus'];
+const CAMPOS = ['diametro_mm', 'tampao_m', 'profundidade_m', 'densidade_fundo', 'inclinacao_graus'];
 const fmt = (n, casas = 2) => Number(n).toFixed(casas).replace('.', ',');
 
 const els = {
@@ -16,6 +16,7 @@ const els = {
   lamina: document.getElementById('lamina'),
   btnPdf: document.getElementById('btn-pdf'),
   btnLimpar: document.getElementById('btn-limpar'),
+  coluna: document.getElementById('coluna_calc'),
 };
 
 let cfg = null;
@@ -113,7 +114,7 @@ function marcar(resultado) {
 
 function renderResultado(resultado, entradasBrutas) {
   if (!resultado.ok) {
-    if (!CAMPOS.slice(0, 4).some((c) => entradasBrutas[c])) {
+    if (!CAMPOS.slice(0, 3).some((c) => entradasBrutas[c])) {
       els.resultado.innerHTML = '<p class="result__empty">Informe diâmetro, tampão e coluna para indicar a célula na tabela.</p>';
       return;
     }
@@ -156,6 +157,8 @@ function renderResultado(resultado, entradasBrutas) {
 
 function atualizar() {
   const brutas = lerEntradas();
+  const coluna = colunaDeCargaBruta(brutas);
+  els.coluna.textContent = coluna === null ? '—' : `${fmt(coluna)} m`;
   const r = consultar(brutas, tabela, cfg);
   ultimo = r;
   renderResultado(r, brutas);
@@ -174,7 +177,7 @@ function renderNotas() {
       <li>O Densiex-G pode ser aplicado até 40 m sem atingir a densidade crítica. Para profundidades maiores, consulte o P&amp;D.</li>
     </ul>`;
   els.modeloNota.textContent =
-    `Modelo de cálculo ${cfg.modelo.versao} (${cfg.modelo.status}). Pressão do tampão por Janssen: atrito na parede do furo, que depende do diâmetro. ` +
+    `Modelo de cálculo ${cfg.modelo.versao}. Pressão do tampão por Janssen: atrito na parede do furo, que depende do diâmetro. ` +
     `Altura efetiva = coluna × cos(inclinação) + tampão equivalente, arredondada para a linha da tabela imediatamente superior. ` +
     `Limiar crítico da planilha: ${fmt(cfg.modelo.limiar_critico_g_cm3)} g/cm³.`;
 }
@@ -208,7 +211,8 @@ function htmlDadosLamina() {
     <dl class="lamina__dl">
       <dt>Diâmetro do furo</dt><dd>${v(b.diametro_mm, 0, 'mm')}</dd>
       <dt>Altura do tampão</dt><dd>${v(b.tampao_m, 2, 'm')}</dd>
-      <dt>Altura da coluna de carga</dt><dd>${v(b.coluna_m, 2, 'm')}</dd>
+      <dt>Profundidade do furo</dt><dd>${v(b.profundidade_m, 2, 'm')}</dd>
+      <dt>Altura da coluna de carga</dt><dd>${colunaDeCargaBruta(b) === null ? '—' : fmt(colunaDeCargaBruta(b)) + ' m'}</dd>
       <dt>Inclinação do furo</dt><dd>${v(b.inclinacao_graus || '0', 0, '°')}</dd>
       <dt>Densidade no fundo</dt><dd>${v(b.densidade_fundo, 2, 'g/cm³')}</dd>
     </dl>`;
@@ -241,7 +245,7 @@ function montarLamina() {
       <div>
         <div class="lamina__dados"><h2>Dados do furo e resultado</h2>${htmlDadosLamina()}</div>
         <div class="lamina__obs">
-          <p>• Pressão do tampão incluída por Janssen (depende do diâmetro). Modelo ${cfg.modelo.versao}, ${cfg.modelo.status}.</p>
+          <p>• Pressão do tampão incluída por Janssen (depende do diâmetro). Modelo ${cfg.modelo.versao}.</p>
           <p>• Coluna corrigida pelo cosseno da inclinação. Campos coloridos: condição crítica.</p>
           <p>• Não recomendado aplicar nos campos coloridos (risco de deflagração). Densiex-G até 40 m sem densidade crítica.</p>
         </div>

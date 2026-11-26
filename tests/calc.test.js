@@ -9,6 +9,7 @@ import {
   alturaEfetiva,
   indiceLinha,
   consultar,
+  colunaDeCargaBruta,
 } from '../js/calc.js';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -27,14 +28,14 @@ test('linha 0 com fundo 1,00 devolve 1,00 no copo (sem coluna, sem tampão)', ()
 });
 
 test('validação rejeita diâmetro fora do limite e campo vazio', () => {
-  const r = validarEntradas({ diametro_mm: '10', tampao_m: '3', coluna_m: '', densidade_fundo: '1.10' }, cfg);
+  const r = validarEntradas({ diametro_mm: '10', tampao_m: '3', profundidade_m: '', densidade_fundo: '1.10' }, cfg);
   assert.equal(r.ok, false);
   assert.ok(r.erros.some((e) => e.startsWith('Diâmetro')));
-  assert.ok(r.erros.some((e) => e.startsWith('Altura da coluna')));
+  assert.ok(r.erros.some((e) => e.startsWith('Profundidade')));
 });
 
 test('validação aceita vírgula decimal', () => {
-  const r = validarEntradas({ diametro_mm: '165', tampao_m: '3,5', coluna_m: '12,0', densidade_fundo: '1,15' }, cfg);
+  const r = validarEntradas({ diametro_mm: '165', tampao_m: '3,5', profundidade_m: '12,0', densidade_fundo: '1,15' }, cfg);
   assert.equal(r.ok, true);
   assert.equal(r.valores.tampao_m, 3.5);
   assert.equal(r.valores.densidade_fundo, 1.15);
@@ -73,7 +74,7 @@ test('indiceLinha arredonda para a linha imediatamente superior', () => {
 
 test('consulta marca a célula esperada sem tampão nem inclinação', () => {
   // Fundo 1,10 é a coluna índice 10; linha de coluna 10 m tem 1,21 nesse índice? Verifica pela própria tabela.
-  const entradas = { diametro_mm: '165', tampao_m: '0', coluna_m: '10', inclinacao_graus: '0', densidade_fundo: '1.10' };
+  const entradas = { diametro_mm: '165', tampao_m: '0', profundidade_m: '10', inclinacao_graus: '0', densidade_fundo: '1.10' };
   const r = consultar(entradas, tabela, cfg);
   assert.equal(r.ok, true);
   assert.equal(r.fora_tabela, false);
@@ -82,7 +83,7 @@ test('consulta marca a célula esperada sem tampão nem inclinação', () => {
 });
 
 test('consulta reporta combinação fora da tabela em vez de inventar valor', () => {
-  const entradas = { diametro_mm: '165', tampao_m: '0', coluna_m: '50', inclinacao_graus: '0', densidade_fundo: '1.00' };
+  const entradas = { diametro_mm: '165', tampao_m: '0', profundidade_m: '50', inclinacao_graus: '0', densidade_fundo: '1.00' };
   const r = consultar(entradas, tabela, cfg);
   // Linha 50 m só tem 6 valores preenchidos (fundo 1,00 a 1,05); 1,00 existe
   assert.equal(r.fora_tabela, false);
@@ -92,12 +93,26 @@ test('consulta reporta combinação fora da tabela em vez de inventar valor', ()
 });
 
 test('altura acima de 50 m é reportada como fora da tabela', () => {
-  const r = consultar({ diametro_mm: '311', tampao_m: '50', coluna_m: '50', inclinacao_graus: '0', densidade_fundo: '1.00' }, tabela, cfg);
+  const r = consultar({ diametro_mm: '311', tampao_m: '50', profundidade_m: '100', inclinacao_graus: '0', densidade_fundo: '1.00' }, tabela, cfg);
   assert.equal(r.fora_tabela, true);
 });
 
 test('critico marca valores iguais ou acima do limiar da planilha (1,25)', () => {
-  const r = consultar({ diametro_mm: '165', tampao_m: '0', coluna_m: '0', inclinacao_graus: '0', densidade_fundo: '1.25' }, tabela, cfg);
+  const r = consultar({ diametro_mm: '165', tampao_m: '0', profundidade_m: '0', inclinacao_graus: '0', densidade_fundo: '1.25' }, tabela, cfg);
   assert.equal(r.densidade_copo, 1.25);
   assert.equal(r.critico, true);
+});
+
+test('coluna de carga é profundidade menos tampão, calculada automaticamente', () => {
+  const r = validarEntradas({ diametro_mm: '165', tampao_m: '3,5', profundidade_m: '15,5', densidade_fundo: '1,15' }, cfg);
+  assert.equal(r.ok, true);
+  assert.equal(r.valores.coluna_m, 12);
+  assert.equal(colunaDeCargaBruta({ tampao_m: '3,5', profundidade_m: '15,5' }), 12);
+});
+
+test('tampão maior que a profundidade gera erro explícito', () => {
+  const r = validarEntradas({ diametro_mm: '165', tampao_m: '20', profundidade_m: '15', densidade_fundo: '1.10' }, cfg);
+  assert.equal(r.ok, false);
+  assert.ok(r.erros.some((e) => e.includes('não pode ser maior')));
+  assert.equal(colunaDeCargaBruta({ tampao_m: '20', profundidade_m: '15' }), null);
 });

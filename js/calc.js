@@ -30,7 +30,16 @@ export function validarEntradas(entradas, cfg) {
 
   const diametro_mm = num('diametro_mm', 'Diâmetro do furo (mm)', lim.diametro_mm);
   const tampao_m = num('tampao_m', 'Altura do tampão (m)', lim.tampao_m);
-  const coluna_m = num('coluna_m', 'Altura da coluna de carga (m)', lim.coluna_m);
+  const profundidade_m = num('profundidade_m', 'Profundidade do furo (m)', lim.profundidade_m);
+  // Coluna de carga = profundidade do furo − altura do tampão (calculada, não digitada)
+  let coluna_m = null;
+  if (profundidade_m !== null && tampao_m !== null) {
+    if (tampao_m > profundidade_m) {
+      erros.push('Altura do tampão não pode ser maior que a profundidade do furo.');
+    } else {
+      coluna_m = profundidade_m - tampao_m;
+    }
+  }
   const inclinacao_graus = num('inclinacao_graus', 'Inclinação do furo (°)', lim.inclinacao_graus, false) ?? 0;
   const densidade_fundo = num(
     'densidade_fundo',
@@ -41,8 +50,24 @@ export function validarEntradas(entradas, cfg) {
   return {
     ok: erros.length === 0,
     erros,
-    valores: { diametro_mm, tampao_m, coluna_m, inclinacao_graus, densidade_fundo },
+    valores: { diametro_mm, tampao_m, profundidade_m, coluna_m, inclinacao_graus, densidade_fundo },
   };
+}
+
+/**
+ * Coluna de carga a partir dos campos brutos, para exibição automática na tela.
+ * Retorna null enquanto a profundidade ou o tampão não forem números válidos.
+ */
+export function colunaDeCargaBruta(entradas) {
+  const ler = (v) => {
+    if (v === '' || v === null || v === undefined) return null;
+    const n = Number(String(v).replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  };
+  const prof = ler(entradas.profundidade_m);
+  const tamp = ler(entradas.tampao_m);
+  if (prof === null || tamp === null || tamp > prof) return null;
+  return prof - tamp;
 }
 
 /**

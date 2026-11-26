@@ -7,8 +7,8 @@
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <title>Densidade no copo | US Vale Verde | OpenBlast</title>
-    <link rel="stylesheet" href="styles.css?v=20261126-faixa-enaex-3" />
-    <script type="module" src="js/app.js?v=20261126-faixa-enaex-3"></script>
+    <link rel="stylesheet" href="styles.css?v=20261126-profundidade-1" />
+    <script type="module" src="js/app.js?v=20261126-profundidade-1"></script>
   </head>
   <body>
     <div class="screen">
@@ -63,9 +63,13 @@
                   <input name="tampao_m" type="text" inputmode="decimal" placeholder="ex.: 3,5" autocomplete="off" />
                 </label>
                 <label class="field">
-                  <span class="field__label">Altura da coluna de carga (m)</span>
-                  <input name="coluna_m" type="text" inputmode="decimal" placeholder="ex.: 12" autocomplete="off" />
+                  <span class="field__label">Profundidade do furo (m)</span>
+                  <input name="profundidade_m" type="text" inputmode="decimal" placeholder="ex.: 15,5" autocomplete="off" />
                 </label>
+                <div class="field">
+                  <span class="field__label">Altura da coluna de carga (m) <em>calculada</em></span>
+                  <output id="coluna_calc" class="field__calc" aria-live="polite">—</output>
+                </div>
                 <label class="field">
                   <span class="field__label">Densidade no fundo do furo (g/cm³)</span>
                   <select name="densidade_fundo" id="densidade_fundo"></select>

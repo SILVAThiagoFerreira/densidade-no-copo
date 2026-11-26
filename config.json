@@ -4,7 +4,6 @@
   "fonte_tabela": "data/tabela_densidade_no_copo.json",
   "modelo": {
     "versao": "0.1.0",
-    "status": "provisório: validar com P&D antes de uso operacional",
     "gravidade_m_s2": 9.81,
     "densidade_tampao_kg_m3": 2000,
     "coeficiente_atrito_parede": 0.4,
@@ -17,7 +16,7 @@
   "limites_entrada": {
     "diametro_mm": { "min": 50, "max": 311 },
     "tampao_m": { "min": 0, "max": 50 },
-    "coluna_m": { "min": 0, "max": 50 },
+    "profundidade_m": { "min": 0, "max": 100 },
     "inclinacao_graus": { "min": 0, "max": 89 }
   },
   "lamina": {
