@@ -165,14 +165,12 @@ a { color: inherit; }
 
 /* Resultado */
 .result {
-  margin-top: 18px; padding: 16px; border: 1px solid var(--hairline);
-  border-left: 4px solid var(--gray-light); border-radius: var(--radius); background: #fafafa;
+  margin-top: 18px; padding: 16px 0;
   min-height: 84px;
 }
 .result__empty { margin: 0; color: var(--gray-mid); font-size: 13px; line-height: 1.5; }
 .result__erro { margin: 0; color: var(--red); font-size: 13px; line-height: 1.5; }
 .result__erro + .result__erro { margin-top: 4px; }
-.result__ok { border-left-color: var(--red); }
 .result__valor { margin: 0; font-size: 30px; font-weight: 700; color: var(--red); line-height: 1; }
 .result__unidade { font-size: 14px; font-weight: 400; color: var(--gray-text); }
 .result__rotulo { margin: 0 0 6px; color: var(--gray-mid); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }

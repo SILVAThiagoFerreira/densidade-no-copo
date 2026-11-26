@@ -7,8 +7,8 @@
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <title>Densidade no copo | US Vale Verde | OpenBlast</title>
-    <link rel="stylesheet" href="styles.css?v=20261126-area-furo-1" />
-    <script type="module" src="js/app.js?v=20261126-area-furo-1"></script>
+    <link rel="stylesheet" href="styles.css?v=20261126-layout-1" />
+    <script type="module" src="js/app.js?v=20261126-layout-1"></script>
   </head>
   <body>
     <div class="screen">
@@ -45,6 +45,9 @@
                 <li><span class="sw sw--regiao"></span> Área do furo (borda vermelha até a célula indicada)</li>
                 <li><span class="sw sw--vazio"></span> Combinação não tabelada</li>
               </ul>
+
+              <div class="notes" id="notas"></div>
+              <p class="model-note" id="modelo-nota"></p>
             </section>
 
             <aside class="card card--form" aria-labelledby="calc-titulo">
@@ -89,11 +92,8 @@
                 <button type="button" class="btn btn--ghost" id="btn-limpar">Limpar</button>
               </div>
 
-              <div class="notes" id="notas"></div>
             </aside>
           </div>
-
-          <p class="model-note" id="modelo-nota"></p>
         </main>
 
         <footer class="page-footer">
