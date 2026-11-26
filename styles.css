@@ -79,7 +79,7 @@ a { color: inherit; }
 }
 .card {
   background: var(--white);
-  border: 1px solid var(--hairline);
+  border: 0;
   border-radius: var(--radius);
   padding: 20px;
   min-width: 0;
