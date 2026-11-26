@@ -90,24 +90,50 @@ function preencherSeletor() {
   });
 }
 
+const CLASSES_REGIAO = ['regiao', 'regiao--topo', 'regiao--esq', 'regiao--dir', 'regiao--base'];
+
+/**
+ * Classes da área do furo: retângulo do canto superior esquerdo até a célula indicada.
+ * Só a borda externa do retângulo recebe classe de contorno.
+ */
+function classesRegiao(r, c, i, j) {
+  if (r > i || c > j) return [];
+  const cls = ['regiao'];
+  if (r === 0) cls.push('regiao--topo');
+  if (c === 0) cls.push('regiao--esq');
+  if (c === j) cls.push('regiao--dir');
+  if (r === i) cls.push('regiao--base');
+  return cls;
+}
+
 function limparMarcacao() {
-  els.tbody.querySelectorAll('.is-marcada').forEach((td) => td.classList.remove('is-marcada'));
+  els.tbody.querySelectorAll('td').forEach((td) => {
+    td.classList.remove(...CLASSES_REGIAO, 'is-celula');
+  });
   els.tbody.querySelectorAll('.is-linha-marcada').forEach((tr) => tr.classList.remove('is-linha-marcada'));
   els.theadRow.querySelectorAll('.is-coluna-marcada').forEach((th) => th.classList.remove('is-coluna-marcada'));
 }
 
 function marcar(resultado) {
   limparMarcacao();
-  if (!resultado || !resultado.ok || resultado.linha_index === undefined) return;
-  const tr = els.tbody.querySelector(`tr[data-row="${resultado.linha_index}"]`);
-  const th = els.theadRow.querySelector(`th[data-col="${resultado.coluna_index}"]`);
-  const td = tr?.querySelector(`td[data-col="${resultado.coluna_index}"]`);
-  if (tr) tr.classList.add('is-linha-marcada');
-  if (th) th.classList.add('is-coluna-marcada');
-  if (td && !resultado.fora_tabela) {
-    td.classList.add('is-marcada');
-    td.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  if (!resultado || !resultado.ok || resultado.linha_index === undefined || resultado.fora_tabela) return;
+  const i = resultado.linha_index;
+  const j = resultado.coluna_index;
+  const linhas = els.tbody.rows;
+
+  for (let r = 0; r <= i; r++) {
+    for (let c = 0; c <= j; c++) {
+      const td = linhas[r].cells[c + 1];
+      classesRegiao(r, c, i, j).forEach((k) => td.classList.add(k));
+    }
   }
+
+  const tr = linhas[i];
+  tr.classList.add('is-linha-marcada');
+  els.theadRow.querySelector(`th[data-col="${j}"]`)?.classList.add('is-coluna-marcada');
+  const marcada = tr.cells[j + 1];
+  marcada.classList.add('is-celula');
+  marcada.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 /* ---------- Resultado ---------- */
@@ -189,12 +215,19 @@ function htmlTabelaLamina() {
   const corpo = tabela.linhas
     .map((linha, i) => {
       const marcada = ultimo && ultimo.ok && ultimo.linha_index === i ? ' class="is-linha-marcada"' : '';
+      const temRegiao = ultimo && ultimo.ok && !ultimo.fora_tabela;
+      const ri = temRegiao ? ultimo.linha_index : -1;
+      const rj = temRegiao ? ultimo.coluna_index : -1;
       const cels = linha.densidades_no_copo
         .map((v, j) => {
           if (v === null) return '<td></td>';
-          const marcadaCel = ultimo && ultimo.ok && !ultimo.fora_tabela && ultimo.linha_index === i && ultimo.coluna_index === j;
-          const cls = marcadaCel ? 'is-marcada' : v >= cfg.modelo.limiar_critico_g_cm3 ? 'is-critico' : '';
-          return `<td class="${cls}">${fmt(v)}</td>`;
+          const cls = [];
+          if (temRegiao) {
+            cls.push(...classesRegiao(i, j, ri, rj));
+            if (i === ri && j === rj) cls.push('is-celula');
+          }
+          if (v >= cfg.modelo.limiar_critico_g_cm3) cls.push('is-critico');
+          return `<td class="${cls.join(' ')}">${fmt(v)}</td>`;
         })
         .join('');
       const rotulo = Number.isInteger(linha.coluna_m) ? String(linha.coluna_m) : fmt(linha.coluna_m, 1);

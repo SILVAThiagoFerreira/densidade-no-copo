@@ -135,12 +135,13 @@ a { color: inherit; }
 .dtable td.is-vazio { background: repeating-linear-gradient(135deg, #fff 0 4px, #f3f3f3 4px 8px); }
 .dtable .is-linha-marcada th.th-linha, .dtable .is-linha-marcada td.td-linha { background: var(--pink-soft); color: var(--red); }
 .dtable thead th.is-coluna-marcada { background: var(--red-enaex); border-color: var(--red-enaex); }
-.dtable td.is-marcada {
-  background: var(--red);
-  color: var(--white);
-  font-weight: 700;
-  box-shadow: inset 0 0 0 2px var(--gray-enaex);
-}
+/* Área do furo: borda vermelha só no contorno do retângulo, do canto superior esquerdo até a célula indicada */
+.dtable td.regiao--topo { border-top: 2px solid var(--red-enaex); }
+.dtable td.regiao--esq { border-left: 2px solid var(--red-enaex); }
+.dtable td.regiao--dir { border-right: 2px solid var(--red-enaex); }
+.dtable td.regiao--base { border-bottom: 2px solid var(--red-enaex); }
+.dtable td.is-celula { color: var(--red); font-weight: 700; }
+.sw--regiao { background: var(--white); border: 2px solid var(--red-enaex); }
 
 .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 0; padding: 0; font-size: 12px; color: var(--gray-text); }
 .legend li { display: inline-flex; align-items: center; gap: 8px; }
@@ -270,7 +271,11 @@ a { color: inherit; }
 .lamina thead th { background: var(--red); color: var(--white); font-weight: 700; }
 .lamina th.th-linha, .lamina td.td-linha { background: #f6f6f6; font-weight: 700; }
 .lamina td.is-critico { background: var(--pink-critico); color: var(--pink-critico-texto); }
-.lamina td.is-marcada { background: var(--red); color: var(--white); font-weight: 700; }
+.lamina td.regiao--topo { border-top: 1pt solid var(--red-enaex); }
+.lamina td.regiao--esq { border-left: 1pt solid var(--red-enaex); }
+.lamina td.regiao--dir { border-right: 1pt solid var(--red-enaex); }
+.lamina td.regiao--base { border-bottom: 1pt solid var(--red-enaex); }
+.lamina td.is-celula { color: var(--red); font-weight: 700; }
 .lamina .is-linha-marcada td.td-linha { background: var(--pink-soft); color: var(--red); }
 .lamina__obs { margin-top: 2mm; font-size: 6.5pt; color: var(--gray-text); line-height: 1.35; }
 .lamina__obs p { margin: 0.6mm 0; }
