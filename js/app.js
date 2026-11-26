@@ -9,7 +9,7 @@ const els = {
   theadRow: document.getElementById('thead-row'),
   tbody: document.getElementById('tbody'),
   form: document.getElementById('form'),
-  select: document.getElementById('densidade_fundo'),
+  listaDensidades: document.getElementById('densidades-fundo'),
   resultado: document.getElementById('resultado'),
   notas: document.getElementById('notas'),
   modeloNota: document.getElementById('modelo-nota'),
@@ -76,17 +76,13 @@ function montarCorpo() {
   els.tbody.appendChild(frag);
 }
 
-function preencherSeletor() {
-  els.select.innerHTML = '';
-  const vazio = document.createElement('option');
-  vazio.value = '';
-  vazio.textContent = 'Selecione';
-  els.select.appendChild(vazio);
+/* Lista de sugestões: o usuário pode escolher ou digitar outra densidade de duas casas. */
+function preencherLista() {
+  els.listaDensidades.innerHTML = '';
   tabela.densidade_fundo.forEach((d) => {
     const o = document.createElement('option');
-    o.value = fmt(d).replace(',', '.');
-    o.textContent = fmt(d);
-    els.select.appendChild(o);
+    o.value = fmt(d);
+    els.listaDensidades.appendChild(o);
   });
 }
 
@@ -108,18 +104,35 @@ function classesRegiao(r, c, i, j) {
 
 function limparMarcacao() {
   els.tbody.querySelectorAll('td').forEach((td) => {
-    td.classList.remove(...CLASSES_REGIAO, 'is-celula');
+    td.classList.remove(...CLASSES_REGIAO, 'is-celula', 'is-coluna-densidade');
   });
   els.tbody.querySelectorAll('.is-linha-marcada').forEach((tr) => tr.classList.remove('is-linha-marcada'));
   els.theadRow.querySelectorAll('.is-coluna-marcada').forEach((th) => th.classList.remove('is-coluna-marcada'));
 }
 
+/**
+ * Marcação em três etapas:
+ * 1) a linha do furo, assim que diâmetro, tampão e profundidade são válidos;
+ * 2) a coluna da densidade desejada, em todas as células possíveis dela;
+ * 3) a área do furo (contorno vermelho) e a célula indicada.
+ */
 function marcar(resultado) {
   limparMarcacao();
-  if (!resultado || !resultado.ok || resultado.linha_index === undefined || resultado.fora_tabela) return;
+  if (!resultado || !resultado.ok || resultado.linha_index === undefined) return;
   const i = resultado.linha_index;
-  const j = resultado.coluna_index;
   const linhas = els.tbody.rows;
+
+  linhas[i].classList.add('is-linha-marcada');
+  if (resultado.sem_densidade) return;
+
+  const j = resultado.coluna_index;
+  els.theadRow.querySelector(`th[data-col="${j}"]`)?.classList.add('is-coluna-marcada');
+  for (let r = 0; r < linhas.length; r++) {
+    const td = linhas[r].cells[j + 1];
+    if (!td.classList.contains('is-vazio')) td.classList.add('is-coluna-densidade');
+  }
+
+  if (resultado.fora_tabela) return;
 
   for (let r = 0; r <= i; r++) {
     for (let c = 0; c <= j; c++) {
@@ -128,10 +141,7 @@ function marcar(resultado) {
     }
   }
 
-  const tr = linhas[i];
-  tr.classList.add('is-linha-marcada');
-  els.theadRow.querySelector(`th[data-col="${j}"]`)?.classList.add('is-coluna-marcada');
-  const marcada = tr.cells[j + 1];
+  const marcada = linhas[i].cells[j + 1];
   marcada.classList.add('is-celula');
   marcada.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
@@ -152,6 +162,21 @@ function renderResultado(resultado, entradasBrutas) {
       p.textContent = e;
       els.resultado.appendChild(p);
     });
+    return;
+  }
+
+  if (resultado.sem_densidade) {
+    const linhasFuro = [
+      `Diâmetro ${fmt(resultado.entrada.diametro_mm, 0)} mm`,
+      `Tampão: +${fmt(resultado.altura_tampao_equivalente_m)} m de coluna equivalente`,
+      `Altura efetiva: ${fmt(resultado.altura_efetiva_m)} m`,
+    ];
+    els.resultado.className = 'result result__ok';
+    els.resultado.innerHTML = `
+      <p class="result__rotulo">Linha do furo</p>
+      <p class="result__valor">${fmt(resultado.coluna_tabela_m, 0)} <span class="result__unidade">m de coluna</span></p>
+      <ul class="result__linhas">${linhasFuro.map((l) => `<li>${l}</li>`).join('')}</ul>
+      <p class="result__linhas">Digite ou escolha a densidade desejada no fundo para marcar a coluna e a célula.</p>`;
     return;
   }
 
@@ -204,6 +229,7 @@ function renderNotas() {
     </ul>`;
   els.modeloNota.textContent =
     `Modelo de cálculo ${cfg.modelo.versao}. Pressão do tampão por Janssen: atrito na parede do furo, que depende do diâmetro. ` +
+    `Convertida com densidade de referência de ${fmt(cfg.modelo.densidade_referencia_tampao_g_cm3)} g/cm³, para a linha não depender da densidade escolhida. ` +
     `Altura efetiva = coluna × cos(inclinação) + tampão equivalente, arredondada para a linha da tabela imediatamente superior. ` +
     `Limiar crítico da planilha: ${fmt(cfg.modelo.limiar_critico_g_cm3)} g/cm³.`;
 }
@@ -215,13 +241,15 @@ function htmlTabelaLamina() {
   const corpo = tabela.linhas
     .map((linha, i) => {
       const marcada = ultimo && ultimo.ok && ultimo.linha_index === i ? ' class="is-linha-marcada"' : '';
-      const temRegiao = ultimo && ultimo.ok && !ultimo.fora_tabela;
+      const temColuna = ultimo && ultimo.ok && !ultimo.sem_densidade && Number.isInteger(ultimo.coluna_index);
+      const temRegiao = temColuna && !ultimo.fora_tabela;
       const ri = temRegiao ? ultimo.linha_index : -1;
-      const rj = temRegiao ? ultimo.coluna_index : -1;
+      const rj = temColuna ? ultimo.coluna_index : -1;
       const cels = linha.densidades_no_copo
         .map((v, j) => {
           if (v === null) return '<td></td>';
           const cls = [];
+          if (temColuna && j === rj) cls.push('is-coluna-densidade');
           if (temRegiao) {
             cls.push(...classesRegiao(i, j, ri, rj));
             if (i === ri && j === rj) cls.push('is-celula');
@@ -251,7 +279,9 @@ function htmlDadosLamina() {
     </dl>`;
   let res = '<p class="lamina__txt">Preencha os dados do furo para indicar a célula.</p>';
   if (ultimo && ultimo.ok) {
-    if (ultimo.fora_tabela) {
+    if (ultimo.sem_densidade) {
+      res = `<div class="lamina__txt">Linha do furo: coluna ${fmt(ultimo.coluna_tabela_m, 0)} m. Densidade desejada não informada.</div>`;
+    } else if (ultimo.fora_tabela) {
       res = `<div class="lamina__val">—</div><div class="lamina__txt">${ultimo.motivo} Consulte o P&amp;D.</div>`;
     } else {
       res = `<div class="lamina__val">${fmt(ultimo.densidade_copo)} g/cm³</div>
@@ -334,7 +364,7 @@ async function iniciar() {
   document.title = `${cfg.titulo} | US Vale Verde | OpenBlast`;
   montarCabecalho();
   montarCorpo();
-  preencherSeletor();
+  preencherLista();
   renderNotas();
   ligarEventos();
   atualizar();

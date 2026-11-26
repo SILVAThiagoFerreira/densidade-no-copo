@@ -8,6 +8,7 @@
     "densidade_tampao_kg_m3": 2000,
     "coeficiente_atrito_parede": 0.4,
     "coeficiente_empuxo_lateral_K": 0.5,
+    "densidade_referencia_tampao_g_cm3": 1.0,
     "limiar_critico_g_cm3": 1.25,
     "densidade_fundo_min_g_cm3": 1.0,
     "densidade_fundo_max_g_cm3": 1.25,

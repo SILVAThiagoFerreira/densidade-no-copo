@@ -153,6 +153,7 @@ a { color: inherit; }
 .dtable td.regiao--dir { border-right: 2px solid var(--red-enaex); }
 .dtable td.regiao--base { border-bottom: 2px solid var(--red-enaex); }
 .dtable td.is-celula { color: var(--red); font-weight: 700; }
+.dtable td.is-coluna-densidade { color: var(--red); font-weight: 700; }
 .sw--regiao { background: var(--white); border: 2px solid var(--red-enaex); }
 
 .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 0; padding: 0; font-size: 12px; color: var(--gray-text); }
@@ -286,6 +287,7 @@ a { color: inherit; }
 .lamina td.regiao--dir { border-right: 1pt solid var(--red-enaex); }
 .lamina td.regiao--base { border-bottom: 1pt solid var(--red-enaex); }
 .lamina td.is-celula { color: var(--red); font-weight: 700; }
+.lamina td.is-coluna-densidade { color: var(--red); font-weight: 700; }
 .lamina .is-linha-marcada td.td-linha { background: var(--pink-soft); color: var(--red); }
 .lamina__obs { margin-top: 2mm; font-size: 6.5pt; color: var(--gray-text); line-height: 1.35; }
 .lamina__obs p { margin: 0.6mm 0; }

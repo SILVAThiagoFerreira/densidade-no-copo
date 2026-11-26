@@ -49,7 +49,7 @@ test('tampão equivalente cresce com o diâmetro e satura (Janssen)', () => {
   assert.ok(h110 > 0 && h110 < h165 && h165 < h311, 'maior diâmetro, maior pressão de tampão');
   // Tampão longo satura em ρt·λ/ρe (limite de Janssen), não cresce sem limite
   const lambda = 0.165 / (4 * cfg.modelo.coeficiente_atrito_parede * cfg.modelo.coeficiente_empuxo_lateral_K);
-  const saturacao = (cfg.modelo.densidade_tampao_kg_m3 * lambda) / (1.1 * 1000);
+  const saturacao = (cfg.modelo.densidade_tampao_kg_m3 * lambda) / (cfg.modelo.densidade_referencia_tampao_g_cm3 * 1000);
   const hLongo = alturaTampaoEquivalente({ ...base, diametro_mm: 165, tampao_m: 300 }, cfg);
   assert.ok(Math.abs(hLongo - saturacao) < 1e-6, `satura em ${saturacao.toFixed(4)} m`);
 });
@@ -115,4 +115,23 @@ test('tampão maior que a profundidade gera erro explícito', () => {
   assert.equal(r.ok, false);
   assert.ok(r.erros.some((e) => e.includes('não pode ser maior')));
   assert.equal(colunaDeCargaBruta({ tampao_m: '20', profundidade_m: '15' }), null);
+});
+
+test('linha do furo sai só dos dados do furo, sem densidade no fundo', () => {
+  const base = { diametro_mm: '165', tampao_m: '3,5', profundidade_m: '15,5', inclinacao_graus: '0' };
+  const sem = consultar({ ...base, densidade_fundo: '' }, tabela, cfg);
+  const com = consultar({ ...base, densidade_fundo: '1.20' }, tabela, cfg);
+  assert.equal(sem.ok, true);
+  assert.equal(sem.sem_densidade, true);
+  assert.equal(sem.densidade_copo, undefined);
+  assert.equal(sem.linha_index, com.linha_index, 'mesma linha, com ou sem densidade');
+  assert.equal(sem.coluna_tabela_m, 13);
+});
+
+test('densidade digitada precisa de duas casas decimais', () => {
+  const r = validarEntradas({ diametro_mm: '165', tampao_m: '0', profundidade_m: '10', densidade_fundo: '1,123' }, cfg);
+  assert.equal(r.ok, false);
+  assert.ok(r.erros.some((e) => e.includes('duas casas decimais')));
+  const ok = validarEntradas({ diametro_mm: '165', tampao_m: '0', profundidade_m: '10', densidade_fundo: '1,15' }, cfg);
+  assert.equal(ok.valores.densidade_fundo, 1.15);
 });

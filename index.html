@@ -7,8 +7,8 @@
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <title>Densidade no copo | US Vale Verde | OpenBlast</title>
-    <link rel="stylesheet" href="styles.css?v=20261126-eixos-1" />
-    <script type="module" src="js/app.js?v=20261126-eixos-1"></script>
+    <link rel="stylesheet" href="styles.css?v=20261126-linha-1" />
+    <script type="module" src="js/app.js?v=20261126-linha-1"></script>
   </head>
   <body>
     <div class="screen">
@@ -79,8 +79,9 @@
                   <output id="coluna_calc" class="field__calc" aria-live="polite">—</output>
                 </div>
                 <label class="field">
-                  <span class="field__label">Densidade no fundo do furo (g/cm³)</span>
-                  <select name="densidade_fundo" id="densidade_fundo"></select>
+                  <span class="field__label">Densidade desejada no fundo do furo (g/cm³) <em>opcional, digite ou escolha</em></span>
+                  <input name="densidade_fundo" id="densidade_fundo" type="text" inputmode="decimal" list="densidades-fundo" placeholder="ex.: 1,15" autocomplete="off" />
+                  <datalist id="densidades-fundo"></datalist>
                 </label>
                 <label class="field">
                   <span class="field__label">Inclinação do furo (°) <em>opcional, padrão 0</em></span>

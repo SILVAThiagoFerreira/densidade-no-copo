@@ -5,14 +5,16 @@ const ARREDONDAMENTO_EPS = 1e-9;
 
 /**
  * Valida entradas brutas (strings ou números vindos do formulário).
+ * A densidade no fundo é opcional: sem ela, a linha do furo ainda é determinada.
  * Retorna { ok, erros, valores } sem fallback silencioso.
  */
 export function validarEntradas(entradas, cfg) {
   const erros = [];
   const lim = cfg.limites_entrada;
+  const vazio = (bruto) => bruto === '' || bruto === null || bruto === undefined;
   const num = (chave, rotulo, limite, obrigatorio = true) => {
     const bruto = entradas[chave];
-    if (bruto === '' || bruto === null || bruto === undefined) {
+    if (vazio(bruto)) {
       if (obrigatorio) erros.push(`${rotulo}: informe um valor.`);
       return null;
     }
@@ -41,11 +43,22 @@ export function validarEntradas(entradas, cfg) {
     }
   }
   const inclinacao_graus = num('inclinacao_graus', 'Inclinação do furo (°)', lim.inclinacao_graus, false) ?? 0;
-  const densidade_fundo = num(
-    'densidade_fundo',
-    'Densidade no fundo do furo (g/cm³)',
-    { min: cfg.modelo.densidade_fundo_min_g_cm3, max: cfg.modelo.densidade_fundo_max_g_cm3 }
-  );
+
+  // Densidade no fundo: opcional. Quando informada, deve ter duas casas decimais.
+  let densidade_fundo = null;
+  if (!vazio(entradas.densidade_fundo)) {
+    const d = { min: cfg.modelo.densidade_fundo_min_g_cm3, max: cfg.modelo.densidade_fundo_max_g_cm3 };
+    const v = Number(String(entradas.densidade_fundo).replace(',', '.'));
+    if (!Number.isFinite(v)) {
+      erros.push('Densidade no fundo do furo (g/cm³): valor inválido.');
+    } else if (v < d.min || v > d.max) {
+      erros.push(`Densidade no fundo do furo (g/cm³): deve estar entre ${d.min} e ${d.max}.`);
+    } else if (Math.abs(v * 100 - Math.round(v * 100)) > 1e-6) {
+      erros.push('Densidade no fundo do furo (g/cm³): use duas casas decimais (ex.: 1,15).');
+    } else {
+      densidade_fundo = Math.round(v * 100) / 100;
+    }
+  }
 
   return {
     ok: erros.length === 0,
@@ -74,15 +87,16 @@ export function colunaDeCargaBruta(entradas) {
  * Altura de coluna equivalente da pressão do tampão (m de emulsão).
  * Janssen: a pressão do tampão é limitada pelo atrito na parede do furo,
  * e depende do diâmetro. σ = ρt·g·λ·(1 − e^(−T/λ)), λ = D / (4·μ·K).
- * A pressão é convertida em altura de emulsão de densidade = densidade no fundo.
+ * A pressão é convertida em altura de emulsão usando a densidade de referência
+ * fixa do config, para que a linha do furo não dependa da densidade escolhida.
  */
-export function alturaTampaoEquivalente({ diametro_mm, tampao_m, densidade_fundo }, cfg) {
+export function alturaTampaoEquivalente({ diametro_mm, tampao_m }, cfg) {
   const m = cfg.modelo;
   const D = diametro_mm / 1000;
   const lambda = D / (4 * m.coeficiente_atrito_parede * m.coeficiente_empuxo_lateral_K);
   const sigma = m.densidade_tampao_kg_m3 * m.gravidade_m_s2 * lambda * (1 - Math.exp(-tampao_m / lambda));
-  const rhoEmulsao = densidade_fundo * 1000;
-  return sigma / (rhoEmulsao * m.gravidade_m_s2);
+  const rhoReferencia = m.densidade_referencia_tampao_g_cm3 * 1000;
+  return sigma / (rhoReferencia * m.gravidade_m_s2);
 }
 
 /** Altura efetiva = coluna corrigida pelo cosseno da inclinação + tampão equivalente. */
@@ -101,13 +115,15 @@ export function indiceLinha(linhas, altura) {
 
 /**
  * Consulta completa. Retorna sempre um objeto explícito; nunca assume valor.
+ * - Sem densidade no fundo: devolve só a linha do furo (sem_densidade = true).
+ * - Com densidade: devolve a célula, ou informa combinação não tabelada.
  */
 export function consultar(entradas, tabela, cfg) {
   const v = validarEntradas(entradas, cfg);
   if (!v.ok) return { ok: false, erros: v.erros };
 
   const { diametro_mm, tampao_m, coluna_m, inclinacao_graus, densidade_fundo } = v.valores;
-  const hTampao = alturaTampaoEquivalente({ diametro_mm, tampao_m, densidade_fundo }, cfg);
+  const hTampao = alturaTampaoEquivalente({ diametro_mm, tampao_m }, cfg);
   const altura = alturaEfetiva({ coluna_m, inclinacao_graus }, hTampao);
   const iLinha = indiceLinha(tabela.linhas, altura);
 
@@ -128,6 +144,17 @@ export function consultar(entradas, tabela, cfg) {
   }
 
   const linha = tabela.linhas[iLinha];
+
+  if (densidade_fundo === null) {
+    return {
+      ...base,
+      fora_tabela: false,
+      sem_densidade: true,
+      linha_index: iLinha,
+      coluna_tabela_m: linha.coluna_m,
+    };
+  }
+
   const iFundo = Math.round((densidade_fundo - tabela.densidade_fundo[0]) * 100);
   const densidade_copo = linha.densidades_no_copo[iFundo];
 
@@ -135,6 +162,7 @@ export function consultar(entradas, tabela, cfg) {
     return {
       ...base,
       fora_tabela: true,
+      sem_densidade: false,
       linha_index: iLinha,
       coluna_index: iFundo,
       coluna_tabela_m: linha.coluna_m,
@@ -145,6 +173,7 @@ export function consultar(entradas, tabela, cfg) {
   return {
     ...base,
     fora_tabela: false,
+    sem_densidade: false,
     linha_index: iLinha,
     coluna_index: iFundo,
     coluna_tabela_m: linha.coluna_m,
