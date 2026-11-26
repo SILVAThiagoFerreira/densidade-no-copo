@@ -231,7 +231,9 @@ function montarLamina() {
   const data = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
   els.lamina.innerHTML = `
     <div class="lamina__top">
-      <img class="lamina__partner" src="assets/enaex-brasil.png" alt="Enaex Brasil" />
+      <img src="assets/enaex-brasil-white.png" alt="Enaex Brasil" />
+      <span>${cfg.titulo}</span>
+      <em>US Vale Verde</em>
     </div>
     <h1 class="lamina__title">${cfg.titulo}</h1>
     <p class="lamina__sub">${cfg.subtitulo}</p>

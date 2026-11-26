@@ -12,7 +12,6 @@
   --pink-critico: #F29A92;
   --pink-critico-texto: #5a0b10;
   --white: #FFFFFF;
-  --faixa-cinza: #D9DEE3;
   --radius: 2px;
   color-scheme: light;
 }
@@ -41,18 +40,24 @@ a { color: inherit; }
 
 .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
 
-/* Faixa cinza Enaex no topo, logo à direita */
-.faixa-enaex {
-  background: var(--faixa-cinza);
+/* Faixa superior (padrão dos projetos): grafite, filete vermelho, logo, título e unidade. */
+.enaex-band {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
   width: 100%;
+  min-height: 50px;
+  padding: 0 35px 0 45px;
+  background: #3a434b;
+  border-bottom: 3px solid #e20613;
+  color: #fff;
 }
-.faixa-enaex__inner {
-  width: min(1180px, calc(100% - 32px));
-  margin: 0 auto;
-  display: flex; justify-content: flex-end; align-items: center;
-  height: 84px;
-}
-.partner-logo { height: 40px; width: auto; }
+.enaex-band__logo { justify-self: start; width: 90px; height: auto; }
+.enaex-band__title { font-size: 15px; font-weight: 700; text-align: center; white-space: nowrap; }
+.enaex-band__end { justify-self: end; }
+.enaex-band__unit { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
 .btn:focus-visible, input:focus-visible, select:focus-visible, .table-wrap:focus-visible {
   outline: 2px solid var(--red-enaex); outline-offset: 3px;
 }
@@ -195,8 +200,10 @@ a { color: inherit; }
 }
 @media (max-width: 600px) {
   .shell { width: calc(100% - 32px); }
-  .faixa-enaex__inner { height: 64px; }
-  .partner-logo { height: 30px; }
+  .enaex-band { padding: 0 16px; min-height: 44px; }
+  .enaex-band__logo { width: 56px; }
+  .enaex-band__title { font-size: 13px; white-space: normal; }
+  .enaex-band__unit { display: none; }
   .page-title { font-size: 28px; }
   .page-subtitle { font-size: 14px; }
   .card { padding: 16px; }
@@ -221,11 +228,13 @@ a { color: inherit; }
   width: 100%;
 }
 .lamina__top {
-  display: flex; justify-content: flex-end; align-items: center;
-  padding: 3mm 4mm; background: var(--faixa-cinza);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 4mm;
+  padding: 2.5mm 5mm; background: #3a434b; border-bottom: 1mm solid #e20613; color: #fff;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
-.lamina__partner { height: 10mm; width: auto; }
+.lamina__top img { justify-self: start; height: 8mm; width: auto; }
+.lamina__top span { font-size: 10pt; font-weight: 700; text-align: center; }
+.lamina__top em { justify-self: end; font-style: normal; font-size: 7pt; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
 .lamina__title { margin: 3mm 0 0; color: var(--red); font-size: 17pt; font-weight: 400; text-transform: uppercase; }
 .lamina__sub { margin: 0.5mm 0 0; color: var(--gray-text); font-size: 8.5pt; }
 
