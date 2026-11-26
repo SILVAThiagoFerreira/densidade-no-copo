@@ -1,0 +1,10 @@
+{
+  "name": "densidade-no-copo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tabela de densidade no copo com diâmetro e tampão",
+  "scripts": {
+    "test": "node --test tests/calc.test.js"
+  }
+}

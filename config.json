@@ -1,0 +1,27 @@
+{
+  "titulo": "Densidade no copo",
+  "subtitulo": "Tabela de densidade no copo por coluna manométrica e densidade no fundo do furo",
+  "fonte_tabela": "data/tabela_densidade_no_copo.json",
+  "modelo": {
+    "versao": "0.1.0",
+    "status": "provisório: validar com P&D antes de uso operacional",
+    "gravidade_m_s2": 9.81,
+    "densidade_tampao_kg_m3": 2000,
+    "coeficiente_atrito_parede": 0.4,
+    "coeficiente_empuxo_lateral_K": 0.5,
+    "limiar_critico_g_cm3": 1.25,
+    "densidade_fundo_min_g_cm3": 1.0,
+    "densidade_fundo_max_g_cm3": 1.25,
+    "arredondamento_coluna": "para a linha da tabela imediatamente superior"
+  },
+  "limites_entrada": {
+    "diametro_mm": { "min": 50, "max": 311 },
+    "tampao_m": { "min": 0, "max": 50 },
+    "coluna_m": { "min": 0, "max": 50 },
+    "inclinacao_graus": { "min": 0, "max": 89 }
+  },
+  "lamina": {
+    "nome_arquivo": "lamina-densidade-no-copo.pdf",
+    "rodape": "Hub de Ferramentas | US Vale Verde | OpenBlast"
+  }
+}
